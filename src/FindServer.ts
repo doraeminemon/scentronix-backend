@@ -7,49 +7,33 @@ export type Server = {
 
 export type SuccessfulResponse = [string, number, AxiosResponse<any, any>];
 
-export class FindServer {
-  servers: Server[];
-  requests: Promise<SuccessfulResponse>[];
-  responses: (SuccessfulResponse | null)[];
-  successfulResponses: SuccessfulResponse[];
-  sortedResponses: SuccessfulResponse[];
+export const mapRequest = (servers: Server[]) => {
+  return servers.map(async (server): Promise<SuccessfulResponse | null> => {
+    try {
+      const resp = await axios.get(server.url, { timeout: 5000 });
+      return [server.url, server.priority, resp];
+    } catch (err) {
+      return null;
+    }
+  });
+};
 
-  constructor(servers: Server[]) {
-    this.servers = servers;
-  }
+export const filterSuccessfulResponses = (
+  responses: (SuccessfulResponse | null)[]
+) => {
+  return responses.filter((resp): resp is SuccessfulResponse =>
+    Array.isArray(resp)
+  );
+};
 
-  mapRequest() {
-    this.requests = this.servers.map(
-      async (server): Promise<SuccessfulResponse | null> => {
-        try {
-          const resp = await axios.get(server.url, { timeout: 5000 });
-          return [server.url, server.priority, resp];
-        } catch (err) {
-          return null;
-        }
-      }
-    );
-  }
+export const sortResponses = (successfulResponses: SuccessfulResponse[]) => {
+  return successfulResponses.sort((a, b) => a[1] - b[1]);
+};
 
-  async sendRequest() {
-    this.responses = await Promise.all(this.requests);
-  }
-
-  filterSuccessfulResponse() {
-    this.successfulResponses = this.responses.filter(
-      (resp): resp is SuccessfulResponse => Array.isArray(resp)
-    );
-  }
-
-  sortResponses() {
-    this.sortedResponses = this.successfulResponses.sort((a, b) => a[1] - b[1]);
-  }
-
-  async run() {
-    this.mapRequest();
-    await this.sendRequest();
-    this.filterSuccessfulResponse();
-    this.sortResponses();
-    return this.sortedResponses[0];
-  }
-}
+export const findServer = async (servers: Server[]) => {
+  const mappedReq = mapRequest(servers);
+  const responses = await Promise.all(mappedReq);
+  const filteredResp = filterSuccessfulResponses(responses);
+  const sortedResp = sortResponses(filteredResp);
+  return sortedResp[0];
+};

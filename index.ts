@@ -1,4 +1,4 @@
-import { FindServer } from "./src/FindServer";
+import { findServer } from "./src/FindServer";
 
 const servers = [
   {
@@ -19,5 +19,5 @@ const servers = [
   },
 ];
 
-const findServer = new FindServer(servers);
-findServer.run().then((resp) => console.log(resp));
+const promise = findServer(servers);
+promise.then((resp) => console.log(resp));
