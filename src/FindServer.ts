@@ -7,7 +7,7 @@ export type Server = {
 
 export type SuccessfulResponse = [string, number, AxiosResponse<any, any>];
 
-export const mapRequest = (servers: Server[]) => {
+export const _mapRequest = (servers: Server[]) => {
   return servers.map(async (server): Promise<SuccessfulResponse | null> => {
     try {
       const resp = await axios.get(server.url, { timeout: 5000 });
@@ -18,7 +18,7 @@ export const mapRequest = (servers: Server[]) => {
   });
 };
 
-export const filterSuccessfulResponses = (
+export const _filterSuccessfulResponses = (
   responses: (SuccessfulResponse | null)[]
 ) => {
   return responses.filter((resp): resp is SuccessfulResponse =>
@@ -26,14 +26,14 @@ export const filterSuccessfulResponses = (
   );
 };
 
-export const sortResponses = (successfulResponses: SuccessfulResponse[]) => {
+export const _sortResponses = (successfulResponses: SuccessfulResponse[]) => {
   return successfulResponses.sort((a, b) => a[1] - b[1]);
 };
 
-export const findServer = async (servers: Server[]) => {
-  const mappedReq = mapRequest(servers);
+export const FindServer = async (servers: Server[]) => {
+  const mappedReq = _mapRequest(servers);
   const responses = await Promise.all(mappedReq);
-  const filteredResp = filterSuccessfulResponses(responses);
-  const sortedResp = sortResponses(filteredResp);
+  const filteredResp = _filterSuccessfulResponses(responses);
+  const sortedResp = _sortResponses(filteredResp);
   return sortedResp[0];
 };

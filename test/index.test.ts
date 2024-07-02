@@ -5,10 +5,10 @@ jest.mock("axios", () => {
   };
 });
 import {
-  findServer,
-  mapRequest,
-  sortResponses,
-  filterSuccessfulResponses,
+  FindServer,
+  _mapRequest,
+  _sortResponses,
+  _filterSuccessfulResponses,
   SuccessfulResponse,
 } from "../src/FindServer";
 
@@ -21,7 +21,7 @@ const mockServers = [
 
 describe("findServer", () => {
   test("#mapRequest", () => {
-    const mappedReq = mapRequest(mockServers);
+    const mappedReq = _mapRequest(mockServers);
     expect(mappedReq.length).toBe(4);
     expect(() => Promise.resolve(mappedReq[0])).not.toThrow();
   });
@@ -31,7 +31,7 @@ describe("findServer", () => {
       ["test", 2, {} as AxiosResponse] as SuccessfulResponse,
       null,
     ];
-    const filteredResp = filterSuccessfulResponses(responses);
+    const filteredResp = _filterSuccessfulResponses(responses);
     expect(filteredResp.length).toBe(1);
     expect(filteredResp[0][0]).toBe("test");
   });
@@ -42,14 +42,14 @@ describe("findServer", () => {
       ["test", 10, {} as AxiosResponse],
       ["test", 1, {} as AxiosResponse],
     ];
-    const sortedResponses = sortResponses(successfulResponses);
+    const sortedResponses = _sortResponses(successfulResponses);
     expect(sortedResponses[0][1]).toBe(1);
     expect(sortedResponses[1][1]).toBe(5);
     expect(sortedResponses[2][1]).toBe(10);
   });
 
   test("#findServer", async () => {
-    const result = await findServer(mockServers);
+    const result = await FindServer(mockServers);
     expect(result[0]).toBe("https://response-with-400.com");
   });
 });
